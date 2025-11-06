@@ -1,0 +1,8 @@
+node_modules
+.env
+uploads/
+credenciais/
+
+/src/generated/
+audio_saida.mp3
+notas.js
