@@ -1,15 +1,26 @@
 //import vision from '@google-cloud/vision';
 import tts from '@google-cloud/text-to-speech';
 import { VertexAI } from "@google-cloud/vertexai"; 
+import dotenv from "dotenv";
+dotenv.config();
+
+const PROJECT_ID = process.env.PROJECT_ID;
+
+// Criar cliente manualmente com as credenciais
+const vertex_ai = new VertexAI({
+  project: PROJECT_ID,
+  location: "us-central1",
+  googleAuthOptions: {
+    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  }
+});
+
+const ttsClient = new tts.TextToSpeechClient({
+    project: PROJECT_ID,
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+ });
 
 
-//const visionClient = new vision.ImageAnnotatorClient();
-const ttsClient = new tts.TextToSpeechClient();
-
-const location = "us-central1"; 
-const PROJECT_ID = process.env.PROJECT_ID
-
-const vertex_ai = new VertexAI({ location, project: PROJECT_ID}); 
 
 const model = "gemini-2.5-flash"; 
 const generativeModel = vertex_ai.getGenerativeModel({ model });
@@ -31,13 +42,22 @@ async function gerarDescricao(imageBuffer) {
    // console.log("TESTANDO Buffer: ", teste) 
     const imageFormatada = ConverterParaEntradaGenerativa(imageBuffer, 'image/jpeg'); 
    // console.log("formato GEMINI:", imagePart)
-    const prompt =  `Você é um assistente de acessibilidade para pessoas cegas. 
-                    Crie uma descrição natural e objetiva desta imagem, seguindo o estilo #PraCegoVer. 
-                    Descreva o que é, mencione o ambiente de fundo, e os elementos importantes.`
-    /*`Você é um assistente de acessibilidade para pessoas cegas.
-        Descreva de forma natural, simples e em um único parágrafo, o que você vê nesta imagem. 
-        Mencione o ambiente, os objetos principais e, se houver, o texto mais relevante. 
-        Não use parênteses ou aspas na resposta.`;*/
+    const prompt =  `Você é um assistente que descreve imagem para pessoas cegas.
+    Descreva a imagem com uma linguagem descritiva, objetiva, apropriada, e não longa, evitando termos visuais complexos desnecessários, 
+    palavras simbolos, ou detalhes pequenos e irrelevantes que aparecerem na imagem. Seguindo o principio da hastag pra cego ver.
+    Se for uma selfie, mencione que é uma selfie, descreva a pessoa suas caracteristicas(como cor dos olho, cabelo, formato 
+    de rosto, etc), cor da roupa se aparecer na foto, evite falar detalhes de fundo.
+    Se for foto de pessoas, descreva a pessoa suas caracteristicas cor de roupa, se tiver um fundo visível descreva de forma breve sem 
+    considerar detalhes minúsculos que tiver.
+    Se for cards convites folders, comece dizendo o que é o material: convite? card? banner de evento?, O que ele informa(identifique a ideia central)? Se houver leia o texto na ordem : título subtítulo informações .
+    evite detalhes minúsculos, evite falar simbolos, decoração que não muda o sentido, fale somente o texto, 
+    sem falar icones, ou caracteres especiais. E se tiver  fundo mencione a cor.
+    Se o convite tiver elementos gráficos importantes para o contexto ou estética, e descreva-os brevemente. Não é necessário descrever cada pequeno detalhe, mas sim o que é 
+    relevante para a compreensão do convite. Priorize a informação textual, o mais importante é garantir que todas 
+    as informações textuais do convite (data, hora, local, tipo de evento, anfitriões, instruções) sejam comunicadas claramente. Não use o "*" para definir tópicos.
+    `
+            
+    
 
     const request = {
         contents: [
@@ -67,11 +87,9 @@ async function gerarDescricao(imageBuffer) {
         return descricaoTexto
         
     } catch (error) {
-        console.error("Erro na Gemini API:", error);
-        throw new Error(`Erro na API Gemini: ${error.message}`);
-    }
-    
-    
+        console.error("Erro na Gemini API:", error?.message || error);
+        throw new Error("Erro ao gerar descrição.");
+    }    
 }
 
 async function gerarAudioDescricao(descricaoTexto){
@@ -98,12 +116,6 @@ export { gerarDescricao, gerarAudioDescricao };
 
 
 
-
-
-/*chamada
-const descricaoImagem = await gerarDescricao(imagem.buffer);
-const audioBuffer = await gerarAudioDescricao(descricaoImagem);
-fs.writeFileSync('audio_saida.mp3', audioBuffer);*/
 
 
 
