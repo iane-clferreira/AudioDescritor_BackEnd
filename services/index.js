@@ -4,31 +4,21 @@ import { VertexAI } from "@google-cloud/vertexai";
 
 
 const PROJECT_ID = process.env.PROJECT_ID;
-const credencialJSON = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-
-if (!credencialJSON) {
-    throw new Error("A variável de ambiente não está configurada.");
-}
-
-const credencial = JSON.parse(credencialJSON);
 
 
 const vertex_ai = new VertexAI({
   project: PROJECT_ID,
   location: process.env.LOCATION,
 
-  credentials: {
-    client_email: credencial.client_email,
-    private_key: credencial.private_key
-  },
-
+  googleAuthOptions: {
+    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  }
 });
 
 const ttsClient = new tts.TextToSpeechClient({
     project: PROJECT_ID,
-    credentials: credencial
-});
-
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+ });
 
 
 const model = "gemini-2.5-flash"; 
