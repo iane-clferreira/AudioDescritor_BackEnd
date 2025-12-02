@@ -1,15 +1,14 @@
 //import vision from '@google-cloud/vision';
 import tts from '@google-cloud/text-to-speech';
 import { VertexAI } from "@google-cloud/vertexai"; 
-import dotenv from "dotenv";
-dotenv.config();
+
 
 const PROJECT_ID = process.env.PROJECT_ID;
 
 // Criar cliente manualmente com as credenciais
 const vertex_ai = new VertexAI({
   project: PROJECT_ID,
-  location: "us-central1",
+  location: process.env.LOCATION,
   googleAuthOptions: {
     keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS
   }
@@ -49,12 +48,14 @@ async function gerarDescricao(imageBuffer) {
     de rosto, etc), cor da roupa se aparecer na foto, evite falar detalhes de fundo.
     Se for foto de pessoas, descreva a pessoa suas caracteristicas cor de roupa, se tiver um fundo visível descreva de forma breve sem 
     considerar detalhes minúsculos que tiver.
-    Se for cards convites folders, comece dizendo o que é o material: convite? card? banner de evento?, O que ele informa(identifique a ideia central)? Se houver leia o texto na ordem : título subtítulo informações .
+    Se for cards convites folders, comece dizendo o que é o material: convite? card? banner de evento?, O que ele informa(identifique a
+    ideia central)? Se houver leia o texto na ordem : título subtítulo informações .
     evite detalhes minúsculos, evite falar simbolos, decoração que não muda o sentido, fale somente o texto, 
     sem falar icones, ou caracteres especiais. E se tiver  fundo mencione a cor.
-    Se o convite tiver elementos gráficos importantes para o contexto ou estética, e descreva-os brevemente. Não é necessário descrever cada pequeno detalhe, mas sim o que é 
-    relevante para a compreensão do convite. Priorize a informação textual, o mais importante é garantir que todas 
-    as informações textuais do convite (data, hora, local, tipo de evento, anfitriões, instruções) sejam comunicadas claramente. Não use o "*" para definir tópicos.
+    Se o convite tiver elementos gráficos importantes para o contexto ou estética, e descreva-os brevemente. Não é necessário descrever 
+    cada pequeno detalhe, mas sim o que é relevante para a compreensão do convite. Priorize a informação textual, o mais importante é 
+    garantir que todas as informações textuais do convite (data, hora, local, tipo de evento, anfitriões, instruções) sejam comunicadas 
+    claramente. Não use o "*" para definir tópicos.
     `
             
     
