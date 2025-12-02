@@ -9,6 +9,7 @@ import { VertexAI } from "@google-cloud/vertexai";
  const CREDENCIAL_LOCAL = process.env.GOOGLE_APPLICATION_CREDENTIALS; 
  
  let authConfig = {};
+ let ttsAuthConfig = {};
  let ttsClient, vertex_ai;
  
 
@@ -17,19 +18,23 @@ import { VertexAI } from "@google-cloud/vertexai";
      try {
          const credentials = JSON.parse(CREDENCIAL_JSON);
          authConfig = { credentials };
-         console.log("Usando credenciais JSON da variável de ambiente (Render/Deploy).");
+         ttsAuthConfig = { credentials };
+        
      } catch (e) {
-         console.error("ERRO: Falha ao parsear GOOGLE_CREDENTIALS_JSON. O formato JSON está incorreto.", e);
+         console.error("ERRO: Falha ao processar GOOGLE_CREDENTIALS_JSON.", e);
      }
  } else if (CREDENCIAL_LOCAL) {
 
      authConfig = { 
          keyFilename: CREDENCIAL_LOCAL
      };
-     console.log("Usando credenciais por caminho de arquivo (Local).");
+     ttsAuthConfig = {
+        keyFilename: CREDENCIAL_LOCAL
+    };
+    
  } else {
  
-     console.log("Nenhuma credencial explícita encontrada. Usando credenciais padrão do ambiente.");
+     console.log("Nenhuma credencial encontrada. Usando credenciais padrão do ambiente.");
  }
  
  try {
@@ -43,7 +48,7 @@ import { VertexAI } from "@google-cloud/vertexai";
 
      ttsClient = new tts.TextToSpeechClient({
          project: PROJECT_ID,
-         googleAuthOptions: authConfig
+         ...ttsAuthConfig
      });
  } catch (error) {
      console.error("Erro fatal ao inicializar clientes Google Cloud:", error.message);
