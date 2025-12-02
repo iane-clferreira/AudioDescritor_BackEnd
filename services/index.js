@@ -4,20 +4,30 @@ import { VertexAI } from "@google-cloud/vertexai";
 
 
 const PROJECT_ID = process.env.PROJECT_ID;
+const credencialJSON = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
 
-// Criar cliente manualmente com as credenciais
+if (!credencialJSON) {
+    throw new Error("A variável de ambiente não está configurada.");
+}
+
+const credencial = JSON.parse(credencialJSON);
+
+
 const vertex_ai = new VertexAI({
   project: PROJECT_ID,
   location: process.env.LOCATION,
-  googleAuthOptions: {
-    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS
-  }
+
+  credentials: {
+    client_email: credencial.client_email,
+    private_key: credencial.private_key
+  },
+
 });
 
 const ttsClient = new tts.TextToSpeechClient({
     project: PROJECT_ID,
-    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
- });
+    credentials: credencial
+});
 
 
 
