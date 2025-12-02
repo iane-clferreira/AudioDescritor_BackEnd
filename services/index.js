@@ -2,23 +2,53 @@
 import tts from '@google-cloud/text-to-speech';
 import { VertexAI } from "@google-cloud/vertexai"; 
 
+ const PROJECT_ID = process.env.PROJECT_ID;
+ const LOCATION = process.env.LOCATION;
+ 
+ const CREDENCIAL_JSON = process.env.GOOGLE_CREDENTIALS_JSON; 
+ const CREDENCIAL_LOCAL = process.env.GOOGLE_APPLICATION_CREDENTIALS; 
+ 
+ let authConfig = {};
+ let ttsClient, vertex_ai;
+ 
 
-const PROJECT_ID = process.env.PROJECT_ID;
+ if (CREDENCIAL_JSON) {
+    
+     try {
+         const credentials = JSON.parse(CREDENCIAL_JSON);
+         authConfig = { credentials };
+         console.log("Usando credenciais JSON da variável de ambiente (Render/Deploy).");
+     } catch (e) {
+         console.error("ERRO: Falha ao parsear GOOGLE_CREDENTIALS_JSON. O formato JSON está incorreto.", e);
+     }
+ } else if (CREDENCIAL_LOCAL) {
 
+     authConfig = { 
+         keyFilename: CREDENCIAL_LOCAL
+     };
+     console.log("Usando credenciais por caminho de arquivo (Local).");
+ } else {
+ 
+     console.log("Nenhuma credencial explícita encontrada. Usando credenciais padrão do ambiente.");
+ }
+ 
+ try {
 
-const vertex_ai = new VertexAI({
-  project: PROJECT_ID,
-  location: process.env.LOCATION,
+     vertex_ai = new VertexAI({
+         project: PROJECT_ID,
+         location: LOCATION,
+         googleAuthOptions: authConfig 
+     });
+ 
 
-  googleAuthOptions: {
-    keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS
-  }
-});
-
-const ttsClient = new tts.TextToSpeechClient({
-    project: PROJECT_ID,
-    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
- });
+     ttsClient = new tts.TextToSpeechClient({
+         project: PROJECT_ID,
+         googleAuthOptions: authConfig
+     });
+ } catch (error) {
+     console.error("Erro fatal ao inicializar clientes Google Cloud:", error.message);
+     throw new Error("Falha na inicialização dos serviços de IA. Verifique as credenciais.");
+ }
 
 
 const model = "gemini-2.5-flash"; 
